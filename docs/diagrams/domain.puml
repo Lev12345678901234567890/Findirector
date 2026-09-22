@@ -1,0 +1,28 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+class MonthPlan {
+  +Quantity : int
+  +Price : decimal
+  +UnitCost : decimal
+  +FixedCosts : decimal
+  +PaidNowPercent : int
+}
+class MonthCalculator {
+  +Calculate(plan, openingCash, openingReceivables) : MonthReport
+}
+class MonthReport {
+  +Revenue : decimal
+  +VariableCosts : decimal
+  +FixedCosts : decimal
+  +Margin : decimal
+  +CashReceipts : decimal
+  +ClosingCash : decimal
+  +ClosingReceivables : decimal
+  +Expenses : decimal {derived}
+  +Profit : decimal {derived}
+  +FundingGap : decimal {derived}
+}
+MonthCalculator ..> MonthPlan : принимает
+MonthCalculator ..> MonthReport : возвращает
+@enduml
