@@ -1,0 +1,25 @@
+@startuml
+!pragma layout smetana
+hide circle
+skinparam linetype ortho
+
+entity "Plan" as plan {
+  * Id : идентификатор <<PK>>
+  --
+  * Name : название
+  * OpeningCash : начальные деньги
+}
+
+entity "PlanMonth" as month {
+  * PlanId : план <<PK, FK>>
+  * MonthNumber : номер 1..3 <<PK>>
+  --
+  * Quantity : Q
+  * Price : P
+  * UnitCost : V
+  * FixedCosts : F
+  * PaidNowPercent : A
+}
+
+plan ||--|{ month : "содержит ровно 3"
+@enduml

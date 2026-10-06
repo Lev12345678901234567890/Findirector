@@ -1,28 +1,80 @@
 @startuml
+!pragma layout smetana
 skinparam classAttributeIconSize 0
 hide empty members
-class MonthPlan {
-  +Quantity : int
-  +Price : decimal
-  +UnitCost : decimal
-  +FixedCosts : decimal
-  +PaidNowPercent : int
+
+package "Findirector.Domain" {
+  class FinancialPlan {
+    +Id : Guid
+    +Name : string
+    +OpeningCash : decimal
+    +Months : IReadOnlyList<MonthPlan>
+  }
+  class MonthPlan {
+    +Quantity : int
+    +Price : decimal
+    +UnitCost : decimal
+    +FixedCosts : decimal
+    +PaidNowPercent : int
+  }
+  class MonthCalculator {
+    +Calculate(plan, openingCash, openingReceivables) : MonthReport
+  }
+  class MonthReport {
+    +Revenue : decimal
+    +VariableCosts : decimal
+    +FixedCosts : decimal
+    +Margin : decimal
+    +CashReceipts : decimal
+    +ClosingCash : decimal
+    +ClosingReceivables : decimal
+    +Expenses : decimal {derived}
+    +Profit : decimal {derived}
+    +FundingGap : decimal {derived}
+  }
+  class PlanForecast {
+    +Months : IReadOnlyList<MonthReport>
+    +TotalProfit : decimal {derived}
+    +FinalCash : decimal {derived}
+    +FinalReceivables : decimal {derived}
+    +FundingNeed : decimal {derived}
+  }
 }
-class MonthCalculator {
-  +Calculate(plan, openingCash, openingReceivables) : MonthReport
+
+package "Findirector.Application" {
+  class PlanService {
+    +Forecast(plan) : PlanForecast
+    +Compare(first, second) : PlanComparison
+    +Save(plan)
+    +List() : IReadOnlyList<PlanSummary>
+    +Open(id) : FinancialPlan
+  }
+  interface IPlanRepository {
+    +Save(plan)
+    +List() : IReadOnlyList<PlanSummary>
+    +Get(id) : FinancialPlan?
+  }
+  class PlanComparison {
+    +First : FinancialPlan
+    +FirstForecast : PlanForecast
+    +Second : FinancialPlan
+    +SecondForecast : PlanForecast
+  }
+  class PlanSummary {
+    +Id : Guid
+    +Name : string
+  }
 }
-class MonthReport {
-  +Revenue : decimal
-  +VariableCosts : decimal
-  +FixedCosts : decimal
-  +Margin : decimal
-  +CashReceipts : decimal
-  +ClosingCash : decimal
-  +ClosingReceivables : decimal
-  +Expenses : decimal {derived}
-  +Profit : decimal {derived}
-  +FundingGap : decimal {derived}
-}
+
+FinancialPlan *-- "3" MonthPlan : месяцы 1, 2, 3
+PlanForecast *-- "3" MonthReport
 MonthCalculator ..> MonthPlan : принимает
 MonthCalculator ..> MonthReport : возвращает
+PlanService --> MonthCalculator
+PlanService --> IPlanRepository
+PlanService ..> PlanForecast : создаёт
+PlanService ..> PlanComparison : создаёт
+PlanComparison --> "2" PlanForecast
+IPlanRepository ..> FinancialPlan
+IPlanRepository ..> PlanSummary
 @enduml
