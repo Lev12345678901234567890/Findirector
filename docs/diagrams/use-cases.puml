@@ -1,0 +1,25 @@
+@startuml
+!pragma layout smetana
+skinparam packageStyle rectangle
+
+actor "Финансовый директор" as director
+
+rectangle "Приложение «Финдиректор»" {
+  usecase "Создать или\nизменить план" as UC1
+  usecase "Рассчитать прогноз\nна три месяца" as UC2
+  usecase "Сравнить\nдва плана" as UC3
+  usecase "Сохранить план" as UC4
+  usecase "Открыть план\nиз списка" as UC5
+  usecase "Проверить ввод" as UC6
+}
+
+director --> UC1
+director --> UC2
+director --> UC3
+director --> UC4
+director --> UC5
+
+UC3 ..> UC2 : <<include>>
+UC2 ..> UC6 : <<include>>
+UC4 ..> UC6 : <<include>>
+@enduml
