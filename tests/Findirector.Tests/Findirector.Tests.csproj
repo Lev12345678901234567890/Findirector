@@ -13,5 +13,6 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <ProjectReference Include="../../src/Findirector.Domain/Findirector.Domain.csproj" />
+    <ProjectReference Include="../../src/Findirector.Application/Findirector.Application.csproj" />
   </ItemGroup>
 </Project>

@@ -21,6 +21,12 @@ Domain ничего не знает об остальных частях. Applic
 
 ![Компоненты](diagrams/components.svg)
 
+**Что уже реализовано (ЛР3).** Проект `Findirector.Application` создан. В Domain добавлены
+`FinancialPlan` и `PlanForecast`, в Application — `PlanService.Forecast`, `PlanService.Compare`
+и `PlanComparison`. Консоль вызывает только `PlanService` и форматирует вывод (ЛР3-А1).
+`IPlanRepository`, `Save`, `List`, `Open` и `PlanSummary` появятся в ЛР4 вместе с SQLite:
+пока хранить нечего, а интерфейс без реализации был бы лишним.
+
 ## 2. Классы (ЛР2-Д2)
 
 Диаграмма классов: [domain.puml](diagrams/domain.puml), [domain.svg](diagrams/domain.svg).

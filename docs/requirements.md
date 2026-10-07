@@ -203,13 +203,36 @@ V = 10 000 ₽, F = 70 000 ₽. Тогда в любом месяце: R = 150 0
 
 Проверяет: П-Ф4, П-Ф1, П-Ф6.
 
+### П9. Разные параметры месяцев (добавлен в ЛР3)
+
+Ввод: начальные деньги 10 000.
+
+| Месяц | Q | P | V | F | A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 | 2 | 20 000 | 5 000 | 30 000 | 50 |
+| 2 | 4 | 25 000 | 5 000 | 30 000 | 25 |
+| 3 | 1 | 30 000 | 10 000 | 30 000 | 100 |
+
+| Месяц | R | E | Прибыль | S | Поступления | C | D |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 40 000 | 40 000 | 0 | 20 000 | 20 000 | −10 000 | 20 000 |
+| 2 | 100 000 | 50 000 | 50 000 | 25 000 | 45 000 | −15 000 | 75 000 |
+| 3 | 30 000 | 40 000 | −10 000 | 30 000 | 105 000 | 50 000 | 0 |
+
+Итоги: прибыль 40 000; C3 = 50 000; D3 = 0; потребность = max(10 000; 15 000) = 15 000
+(а не сумма дефицитов 25 000). Проверяет: П-Б4, П-Б5, П-Б7.
+
 ## 8. Таблица соответствия
 
-| Функция | Что требует | Сценарий | Примеры |
-| --- | --- | --- | --- |
-| П-Ф1 | Создание и редактирование плана | С1 | П1, П2, П3, П8 |
-| П-Ф2 | Месячные показатели и итоги | С1 | П1, П2, П3, П4, П5 |
-| П-Ф3 | Сравнение двух планов | С2 | П7 |
-| П-Ф4 | Сохранение, список, открытие, обновление по идентификатору | С3 | П8 |
-| П-Ф5 | Ошибка с полем и причиной, без расчёта и сохранения | С1, С2, С3 | П6 |
-| П-Ф6 | Пересчёт с исходных данных, скрытие старого результата | С1, С2 | П3, П8 |
+Операции — методы `PlanService` (Application) и конструкторы `FinancialPlan`, `MonthPlan` (Domain).
+Тесты — в `tests/Findirector.Tests/PlanServiceTests.cs`. П-Ф4 (хранение) реализуется в ЛР4,
+П-Ф6 в части скрытия результата на экране — в ЛР5.
+
+| Функция | Что требует | Сценарий | Примеры | Операции | Тесты |
+| --- | --- | --- | --- | --- | --- |
+| П-Ф1 | Создание и редактирование плана | С1 | П1, П2, П3, П8 | `new FinancialPlan(...)`, `new MonthPlan(...)` | ZeroPercent_ProfitButCashGap, HalfPercent_NoFundingNeed, FullPercent_NoReceivables, DifferentMonths_AreCalculatedOneByOne |
+| П-Ф2 | Месячные показатели и итоги | С1 | П1–П5, П9 | `PlanService.Forecast`, `PlanForecast` | ZeroPercent_ProfitButCashGap, HalfPercent_NoFundingNeed, FullPercent_NoReceivables, NoSales_FixedCostsMakeLoss, ExactlyZeroCash_IsNotAFundingNeed, DifferentMonths_AreCalculatedOneByOne, Receivables_AreCollectedNextMonth, NegativeCash_DoesNotStopForecast, FundingNeed_IsMaxNotSum |
+| П-Ф3 | Сравнение двух планов | С2 | П7 | `PlanService.Compare` | Compare_ShowsSameProfitDifferentCash, Compare_PlansDoNotAffectEachOther |
+| П-Ф4 | Сохранение, список, открытие | С3 | П8 | — (ЛР4) | — (ЛР4) |
+| П-Ф5 | Ошибка с полем и причиной | С1, С2, С3 | П6 | конструкторы `MonthPlan`, `FinancialPlan` | InvalidPercent_IsRejectedWithFieldName, NegativeOpeningCash_IsRejected, EmptyName_IsRejected, WrongMonthCount_IsRejected, MissingMonth_IsRejected, EmptyId_IsRejected, NullPlan_IsRejected |
+| П-Ф6 | Пересчёт с исходных данных | С1, С2 | П3, П8 | `PlanService.Forecast` | RepeatedForecast_GivesSameResult, ForecastAndCompare_DoNotChangePlan, ChangingSourceArray_DoesNotChangePlan |

@@ -5,6 +5,7 @@ hide empty members
 
 package "Findirector.Domain" {
   class FinancialPlan {
+    +{static} MonthCount : int = 3
     +Id : Guid
     +Name : string
     +OpeningCash : decimal
@@ -45,11 +46,11 @@ package "Findirector.Application" {
   class PlanService {
     +Forecast(plan) : PlanForecast
     +Compare(first, second) : PlanComparison
-    +Save(plan)
-    +List() : IReadOnlyList<PlanSummary>
-    +Open(id) : FinancialPlan
+    +Save(plan) <<ЛР4>>
+    +List() : IReadOnlyList<PlanSummary> <<ЛР4>>
+    +Open(id) : FinancialPlan <<ЛР4>>
   }
-  interface IPlanRepository {
+  interface IPlanRepository <<ЛР4>> {
     +Save(plan)
     +List() : IReadOnlyList<PlanSummary>
     +Get(id) : FinancialPlan?
@@ -60,7 +61,7 @@ package "Findirector.Application" {
     +Second : FinancialPlan
     +SecondForecast : PlanForecast
   }
-  class PlanSummary {
+  class PlanSummary <<ЛР4>> {
     +Id : Guid
     +Name : string
   }

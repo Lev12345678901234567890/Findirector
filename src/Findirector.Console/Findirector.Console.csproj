@@ -4,5 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Findirector.Domain/Findirector.Domain.csproj" />
+    <ProjectReference Include="../Findirector.Application/Findirector.Application.csproj" />
   </ItemGroup>
 </Project>
