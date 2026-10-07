@@ -5,7 +5,7 @@ namespace Findirector.Tests;
 
 public sealed class PlanServiceTests
 {
-    private readonly PlanService service = new();
+    private readonly PlanService service = new(new InMemoryPlanRepository());
 
     // Контрольный план из постановки: 50 000 на старте, каждый месяц Q = 5, P = 30 000, V = 10 000, F = 70 000
     private static FinancialPlan ControlPlan(int percent, decimal openingCash = 50_000m, string name = "Контрольный")

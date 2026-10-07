@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="src/Findirector.Domain/Findirector.Domain.csproj" />
   <Project Path="src/Findirector.Application/Findirector.Application.csproj" />
+  <Project Path="src/Findirector.Infrastructure/Findirector.Infrastructure.csproj" />
   <Project Path="src/Findirector.Console/Findirector.Console.csproj" />
   <Project Path="tests/Findirector.Tests/Findirector.Tests.csproj" />
 </Solution>

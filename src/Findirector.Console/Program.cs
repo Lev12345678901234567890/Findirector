@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Findirector.Application;
 using Findirector.Domain;
+using Findirector.Infrastructure;
 
 Console.OutputEncoding = Encoding.UTF8;
 CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
@@ -10,9 +11,9 @@ Console.WriteLine("Финдиректор: прибыль есть — дене�
 Console.WriteLine("План на три месяца. На старте 50 000 руб. Каждый месяц 5 сайтов по 30 000 руб.");
 Console.WriteLine("Затраты: 10 000 руб. на сайт и 70 000 руб. постоянных расходов.");
 
-var service = new PlanService();
-FinancialPlan later = ControlPlan("Всё через месяц", 0);
-FinancialPlan half = ControlPlan("Половина сразу", 50);
+var service = new PlanService(new SqlitePlanRepository("findirector.db"));
+FinancialPlan later = ControlPlan(new Guid("11111111-0000-0000-0000-000000000001"), "Всё через месяц", 0);
+FinancialPlan half = ControlPlan(new Guid("11111111-0000-0000-0000-000000000002"), "Половина сразу", 50);
 
 PrintForecast(later, service.Forecast(later));
 PrintForecast(half, service.Forecast(half));
@@ -40,11 +41,23 @@ for (int i = 0; i < percents.Length; i++)
 }
 Console.WriteLine("План с ошибкой не создаётся, поэтому прогноз не строится.");
 
-static FinancialPlan ControlPlan(string name, int percent)
+// ЛР4: сохранение и открытие. Id постоянные, поэтому повторный запуск обновляет планы, а не дублирует
+service.Save(later);
+service.Save(half);
+Console.WriteLine("\nСохранено в findirector.db. Список планов:");
+foreach (PlanSummary summary in service.List())
+    Console.WriteLine($"  {summary.Name}  ({summary.Id})");
+
+FinancialPlan opened = service.Open(half.Id);
+PlanForecast reopened = service.Forecast(opened);
+Console.WriteLine($"\nОткрыт план «{opened.Name}»: начальные деньги {opened.OpeningCash:N2}, оплата сразу {opened.Months[0].PaidNowPercent}%");
+Console.WriteLine($"Деньги после месяца 3 после открытия: {reopened.FinalCash:N0} — как до сохранения: {service.Forecast(half).FinalCash:N0}");
+
+static FinancialPlan ControlPlan(Guid id, string name, int percent)
 {
     var month = new MonthPlan(quantity: 5, price: 30_000m, unitCost: 10_000m,
         fixedCosts: 70_000m, paidNowPercent: percent);
-    return new FinancialPlan(Guid.NewGuid(), name, openingCash: 50_000m, new[] { month, month, month });
+    return new FinancialPlan(id, name, openingCash: 50_000m, new[] { month, month, month });
 }
 
 static void PrintForecast(FinancialPlan plan, PlanForecast forecast)

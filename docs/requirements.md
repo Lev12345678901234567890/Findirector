@@ -225,7 +225,7 @@ V = 10 000 ₽, F = 70 000 ₽. Тогда в любом месяце: R = 150 0
 ## 8. Таблица соответствия
 
 Операции — методы `PlanService` (Application) и конструкторы `FinancialPlan`, `MonthPlan` (Domain).
-Тесты — в `tests/Findirector.Tests/PlanServiceTests.cs`. П-Ф4 (хранение) реализуется в ЛР4,
+Тесты расчёта — в `tests/Findirector.Tests/PlanServiceTests.cs`, тесты хранения (ЛР4) — в `SqlitePlanRepositoryTests.cs`.
 П-Ф6 в части скрытия результата на экране — в ЛР5.
 
 | Функция | Что требует | Сценарий | Примеры | Операции | Тесты |
@@ -233,6 +233,6 @@ V = 10 000 ₽, F = 70 000 ₽. Тогда в любом месяце: R = 150 0
 | П-Ф1 | Создание и редактирование плана | С1 | П1, П2, П3, П8 | `new FinancialPlan(...)`, `new MonthPlan(...)` | ZeroPercent_ProfitButCashGap, HalfPercent_NoFundingNeed, FullPercent_NoReceivables, DifferentMonths_AreCalculatedOneByOne |
 | П-Ф2 | Месячные показатели и итоги | С1 | П1–П5, П9 | `PlanService.Forecast`, `PlanForecast` | ZeroPercent_ProfitButCashGap, HalfPercent_NoFundingNeed, FullPercent_NoReceivables, NoSales_FixedCostsMakeLoss, ExactlyZeroCash_IsNotAFundingNeed, DifferentMonths_AreCalculatedOneByOne, Receivables_AreCollectedNextMonth, NegativeCash_DoesNotStopForecast, FundingNeed_IsMaxNotSum |
 | П-Ф3 | Сравнение двух планов | С2 | П7 | `PlanService.Compare` | Compare_ShowsSameProfitDifferentCash, Compare_PlansDoNotAffectEachOther |
-| П-Ф4 | Сохранение, список, открытие | С3 | П8 | — (ЛР4) | — (ЛР4) |
-| П-Ф5 | Ошибка с полем и причиной | С1, С2, С3 | П6 | конструкторы `MonthPlan`, `FinancialPlan` | InvalidPercent_IsRejectedWithFieldName, NegativeOpeningCash_IsRejected, EmptyName_IsRejected, WrongMonthCount_IsRejected, MissingMonth_IsRejected, EmptyId_IsRejected, NullPlan_IsRejected |
+| П-Ф4 | Сохранение, список, открытие | С3 | П8 | `PlanService.Save`, `PlanService.List`, `PlanService.Open`, `SqlitePlanRepository` | FirstRun_CreatesEmptyDatabase, SaveAndOpen_WithNewInstance_KeepsKopecks, Forecast_AfterOpen_IsTheSame, Example8_SaveRestartOpenAndRecalculate, SaveAgain_UpdatesPlanWithoutDuplicate, SaveAgain_DoesNotTouchOtherPlan, List_ReturnsAllPlansSortedByName, Get_UnknownId_ReturnsNull, Open_UnknownId_Throws |
+| П-Ф5 | Ошибка с полем и причиной | С1, С2, С3 | П6 | конструкторы `MonthPlan`, `FinancialPlan` | InvalidPercent_IsRejectedWithFieldName, NegativeOpeningCash_IsRejected, EmptyName_IsRejected, WrongMonthCount_IsRejected, MissingMonth_IsRejected, EmptyId_IsRejected, NullPlan_IsRejected, InvalidPlan_IsNeverSaved, Database_RejectsDuplicateMonthNumber, Database_RejectsMonthWithoutPlan |
 | П-Ф6 | Пересчёт с исходных данных | С1, С2 | П3, П8 | `PlanService.Forecast` | RepeatedForecast_GivesSameResult, ForecastAndCompare_DoNotChangePlan, ChangingSourceArray_DoesNotChangePlan |

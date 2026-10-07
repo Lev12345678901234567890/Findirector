@@ -1,7 +1,7 @@
-# ЛР2 — Сохраняемые данные
+# Сохраняемые данные (ЛР2, уточнено в ЛР4)
 
 Логическая модель: [er.puml](diagrams/er.puml), [er.svg](diagrams/er.svg).
-SQL-типы и точная схема SQLite добавляются в ЛР4.
+Раздел «Схема SQLite» добавлен в ЛР4.
 
 ![ER](diagrams/er.svg)
 
@@ -45,8 +45,44 @@ SQL-типы и точная схема SQLite добавляются в ЛР4.
 
 | Хранилище | Код |
 | --- | --- |
-| Plan | `FinancialPlan` (Id, Name, OpeningCash) |
-| PlanMonth | `MonthPlan` в `FinancialPlan.Months`; MonthNumber = позиция в списке + 1 |
+| Plan (таблица Plans) | `FinancialPlan` (Id, Name, OpeningCash) |
+| PlanMonth (таблица MonthPlans) | `MonthPlan` в `FinancialPlan.Months`; MonthNumber = позиция в списке + 1 |
 
-Денежные поля нельзя хранить как число с плавающей точкой: копейки могут потеряться.
-В ЛР4 их удобно хранить целым числом копеек.
+## Схема SQLite (ЛР4)
+
+Деньги хранятся **целым числом копеек** (`INTEGER`): 50 000,50 ₽ → 5 000 050.
+Тип REAL (число с плавающей точкой) не используется — в нём копейки могут потеряться.
+При чтении копейки делятся на 100 и снова становятся `decimal`.
+
+### Таблица Plans
+
+| Столбец | SQL-тип | Ограничения | Поле в коде |
+| --- | --- | --- | --- |
+| Id | TEXT | PRIMARY KEY | FinancialPlan.Id (Guid строкой) |
+| Name | TEXT | NOT NULL, CHECK (length(trim(Name)) > 0) | FinancialPlan.Name |
+| OpeningCashKopecks | INTEGER | NOT NULL, CHECK (≥ 0) | FinancialPlan.OpeningCash × 100 |
+
+### Таблица MonthPlans
+
+| Столбец | SQL-тип | Ограничения | Поле в коде |
+| --- | --- | --- | --- |
+| PlanId | TEXT | NOT NULL, FOREIGN KEY → Plans(Id) ON DELETE CASCADE | — |
+| MonthNumber | INTEGER | NOT NULL, CHECK (1…3) | позиция в Months + 1 |
+| Quantity | INTEGER | NOT NULL, CHECK (≥ 0) | MonthPlan.Quantity |
+| PriceKopecks | INTEGER | NOT NULL, CHECK (≥ 0) | MonthPlan.Price × 100 |
+| UnitCostKopecks | INTEGER | NOT NULL, CHECK (≥ 0) | MonthPlan.UnitCost × 100 |
+| FixedCostsKopecks | INTEGER | NOT NULL, CHECK (≥ 0) | MonthPlan.FixedCosts × 100 |
+| PaidNowPercent | INTEGER | NOT NULL, CHECK (0…100) | MonthPlan.PaidNowPercent |
+
+Первичный ключ MonthPlans — **(PlanId, MonthNumber)**: в одном плане номер месяца уникален (П-Б10).
+
+### Правила работы с базой
+
+- Схема создаётся при первом запуске (`CREATE TABLE IF NOT EXISTS`), файл базы — `findirector.db`.
+- Для каждого подключения выполняется `PRAGMA foreign_keys = ON` — без этого SQLite не проверяет внешние ключи.
+- Сохранение — **одна транзакция**: вставить или обновить строку плана (`INSERT … ON CONFLICT(Id) DO UPDATE`),
+  удалить старые месяцы плана, вставить три новых. Если что-то упало — откат, в базе остаётся прежняя версия.
+- Тот же Id → обновление, второй план не появляется (П-Ф4).
+- Недопустимый план сохранить нельзя: его не создаст конструктор `FinancialPlan` / `MonthPlan` (П-Ф5).
+  CHECK-ограничения в базе — вторая линия защиты.
+- При открытии план собирается через конструкторы Domain, поэтому повреждённые данные тоже будут отклонены.

@@ -46,11 +46,11 @@ package "Findirector.Application" {
   class PlanService {
     +Forecast(plan) : PlanForecast
     +Compare(first, second) : PlanComparison
-    +Save(plan) <<ЛР4>>
-    +List() : IReadOnlyList<PlanSummary> <<ЛР4>>
-    +Open(id) : FinancialPlan <<ЛР4>>
+    +Save(plan)
+    +List() : IReadOnlyList<PlanSummary>
+    +Open(id) : FinancialPlan
   }
-  interface IPlanRepository <<ЛР4>> {
+  interface IPlanRepository {
     +Save(plan)
     +List() : IReadOnlyList<PlanSummary>
     +Get(id) : FinancialPlan?
@@ -61,12 +61,22 @@ package "Findirector.Application" {
     +Second : FinancialPlan
     +SecondForecast : PlanForecast
   }
-  class PlanSummary <<ЛР4>> {
+  class PlanSummary {
     +Id : Guid
     +Name : string
   }
 }
 
+package "Findirector.Infrastructure" {
+  class SqlitePlanRepository {
+    +SqlitePlanRepository(databasePath)
+    +Save(plan)
+    +List() : IReadOnlyList<PlanSummary>
+    +Get(id) : FinancialPlan?
+  }
+}
+
+SqlitePlanRepository ..|> IPlanRepository
 FinancialPlan *-- "3" MonthPlan : месяцы 1, 2, 3
 PlanForecast *-- "3" MonthReport
 MonthCalculator ..> MonthPlan : принимает

@@ -3,23 +3,23 @@
 hide circle
 skinparam linetype ortho
 
-entity "Plan" as plan {
-  * Id : идентификатор <<PK>>
+entity "Plans" as plan {
+  * Id : TEXT <<PK>>
   --
-  * Name : название
-  * OpeningCash : начальные деньги
+  * Name : TEXT
+  * OpeningCashKopecks : INTEGER
 }
 
-entity "PlanMonth" as month {
-  * PlanId : план <<PK, FK>>
-  * MonthNumber : номер 1..3 <<PK>>
+entity "MonthPlans" as month {
+  * PlanId : TEXT <<PK, FK>>
+  * MonthNumber : INTEGER (1..3) <<PK>>
   --
-  * Quantity : Q
-  * Price : P
-  * UnitCost : V
-  * FixedCosts : F
-  * PaidNowPercent : A
+  * Quantity : INTEGER
+  * PriceKopecks : INTEGER
+  * UnitCostKopecks : INTEGER
+  * FixedCostsKopecks : INTEGER
+  * PaidNowPercent : INTEGER (0..100)
 }
 
-plan ||--|{ month : "содержит ровно 3"
+plan ||--|{ month : "содержит ровно 3\nON DELETE CASCADE"
 @enduml

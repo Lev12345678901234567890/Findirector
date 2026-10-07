@@ -6,6 +6,13 @@ namespace Findirector.Application;
 public sealed class PlanService
 {
     private readonly MonthCalculator calculator = new();
+    private readonly IPlanRepository repository;
+
+    public PlanService(IPlanRepository repository)
+    {
+        ArgumentNullException.ThrowIfNull(repository);
+        this.repository = repository;
+    }
 
     public PlanForecast Forecast(FinancialPlan plan)
     {
@@ -35,4 +42,15 @@ public sealed class PlanService
 
         return new PlanComparison(first, Forecast(first), second, Forecast(second));
     }
+
+    public void Save(FinancialPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        repository.Save(plan);
+    }
+
+    public IReadOnlyList<PlanSummary> List() => repository.List();
+
+    public FinancialPlan Open(Guid id) =>
+        repository.Get(id) ?? throw new KeyNotFoundException("План не найден.");
 }

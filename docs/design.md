@@ -24,8 +24,11 @@ Domain ничего не знает об остальных частях. Applic
 **Что уже реализовано (ЛР3).** Проект `Findirector.Application` создан. В Domain добавлены
 `FinancialPlan` и `PlanForecast`, в Application — `PlanService.Forecast`, `PlanService.Compare`
 и `PlanComparison`. Консоль вызывает только `PlanService` и форматирует вывод (ЛР3-А1).
-`IPlanRepository`, `Save`, `List`, `Open` и `PlanSummary` появятся в ЛР4 вместе с SQLite:
-пока хранить нечего, а интерфейс без реализации был бы лишним.
+
+
+**ЛР4.** Добавлены `IPlanRepository` и `PlanSummary` (Application), операции `PlanService.Save`, `List`, `Open`
+и проект `Findirector.Infrastructure` с `SqlitePlanRepository`. `PlanService` получает хранилище через
+конструктор и знает только интерфейс (DIP). Схема базы — в [data.md](data.md). Формулы Domain не менялись (ЛР4-А1).
 
 ## 2. Классы (ЛР2-Д2)
 
