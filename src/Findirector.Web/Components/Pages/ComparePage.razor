@@ -1,0 +1,119 @@
+@page "/compare"
+@inject PlanService Service
+
+<PageTitle>Сравнение — Финдиректор</PageTitle>
+
+<h1>Сравнение двух планов</h1>
+
+@if (saved.Count < 2)
+{
+    <p class="hint">Для сравнения нужно сохранить хотя бы два плана на экране «План».</p>
+}
+
+<div class="fields">
+    <label for="first">Первый план</label>
+    <select id="first" @bind="firstId" @bind:after="Changed">
+        <option value="@Guid.Empty">— выберите —</option>
+        @foreach (PlanSummary plan in saved)
+        {
+            <option value="@plan.Id">@plan.Name</option>
+        }
+    </select>
+
+    <label for="second">Второй план</label>
+    <select id="second" @bind="secondId" @bind:after="Changed">
+        <option value="@Guid.Empty">— выберите —</option>
+        @foreach (PlanSummary plan in saved)
+        {
+            <option value="@plan.Id">@plan.Name</option>
+        }
+    </select>
+</div>
+
+<div class="buttons">
+    <button id="compare" class="primary" @onclick="Compare">Сравнить</button>
+</div>
+
+@if (error is not null)
+{
+    <p class="error" id="error">@error</p>
+}
+
+@if (comparison is not null)
+{
+    <table class="compare" id="comparison">
+        <thead>
+            <tr>
+                <th>Показатель</th>
+                <th>@comparison.First.Name</th>
+                <th>@comparison.Second.Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Прибыль за 3 месяца</td>
+                <td>@Format.Money(comparison.FirstForecast.TotalProfit)</td>
+                <td>@Format.Money(comparison.SecondForecast.TotalProfit)</td>
+            </tr>
+            <tr>
+                <td>Деньги после месяца 3</td>
+                <td>@Cash(comparison.FirstForecast)</td>
+                <td>@Cash(comparison.SecondForecast)</td>
+            </tr>
+            <tr>
+                <td>Клиенты ещё должны</td>
+                <td>@Format.Money(comparison.FirstForecast.FinalReceivables)</td>
+                <td>@Format.Money(comparison.SecondForecast.FinalReceivables)</td>
+            </tr>
+            <tr>
+                <td>Нужно денег на старте</td>
+                <td>@Format.Money(comparison.FirstForecast.FundingNeed)</td>
+                <td>@Format.Money(comparison.SecondForecast.FundingNeed)</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<PlanSummary> saved = Array.Empty<PlanSummary>();
+    private Guid firstId;
+    private Guid secondId;
+    private PlanComparison? comparison;
+    private string? error;
+
+    protected override void OnInitialized() => saved = Service.List();
+
+    // П-Ф6: выбрали другой план — прежнее сравнение скрывается
+    private void Changed()
+    {
+        comparison = null;
+        error = null;
+    }
+
+    private void Compare()
+    {
+        comparison = null;
+        if (firstId == Guid.Empty || secondId == Guid.Empty || firstId == secondId)
+        {
+            error = "Выберите два разных плана.";
+            return;
+        }
+
+        try
+        {
+            // Планы открываются из хранилища, поэтому сравниваются последние сохранённые данные
+            comparison = Service.Compare(Service.Open(firstId), Service.Open(secondId));
+            error = null;
+        }
+        catch (KeyNotFoundException e)
+        {
+            error = e.Message;
+        }
+    }
+
+    // Деньги после месяца 3 и подпись при дефиците (по итогу Domain, без своих формул)
+    private static string Cash(PlanForecast forecast) =>
+        forecast.FinalCash < 0
+            ? $"{Format.Money(forecast.FinalCash)} — Не хватает денег"
+            : Format.Money(forecast.FinalCash);
+}

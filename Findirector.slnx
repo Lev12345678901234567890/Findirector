@@ -3,5 +3,6 @@
   <Project Path="src/Findirector.Application/Findirector.Application.csproj" />
   <Project Path="src/Findirector.Infrastructure/Findirector.Infrastructure.csproj" />
   <Project Path="src/Findirector.Console/Findirector.Console.csproj" />
+  <Project Path="src/Findirector.Web/Findirector.Web.csproj" />
   <Project Path="tests/Findirector.Tests/Findirector.Tests.csproj" />
 </Solution>

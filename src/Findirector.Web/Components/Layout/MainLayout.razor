@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+
+<div class="layout">
+    <nav class="menu">
+        <div class="brand">Финдиректор</div>
+        <NavLink href="" Match="NavLinkMatch.All">План</NavLink>
+        <NavLink href="compare">Сравнение</NavLink>
+    </nav>
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Произошла непредвиденная ошибка.
+    <a href="." class="reload">Обновить</a>
+    <span class="dismiss">🗙</span>
+</div>

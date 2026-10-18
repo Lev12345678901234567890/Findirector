@@ -1,0 +1,195 @@
+@page "/"
+@inject PlanService Service
+
+<PageTitle>План — Финдиректор</PageTitle>
+
+<div class="plan-page">
+    <aside class="saved">
+        <h2>Сохранённые планы</h2>
+        @if (saved.Count == 0)
+        {
+            <p class="hint">Сохранённых планов пока нет.</p>
+        }
+        <ul>
+            @foreach (PlanSummary plan in saved)
+            {
+                <li>
+                    <span>@plan.Name</span>
+                    <button class="small" @onclick="() => OpenPlan(plan.Id)">Открыть</button>
+                </li>
+            }
+        </ul>
+        <button id="new-plan" @onclick="NewPlan">Новый план</button>
+    </aside>
+
+    <section class="editor">
+        <h1>План</h1>
+
+        <div class="fields">
+            <label for="name">Название</label>
+            <input id="name" @bind="draft.Name" @bind:after="Changed" />
+
+            <label for="opening-cash">Начальные деньги, ₽</label>
+            <input id="opening-cash" type="number" step="0.01" @bind="draft.OpeningCash" @bind:after="Changed" />
+        </div>
+
+        <table class="months-input">
+            <thead>
+                <tr>
+                    <th>Месяц</th>
+                    <th title="Количество услуг">Q, шт.</th>
+                    <th title="Цена одной услуги">P, ₽</th>
+                    <th title="Переменные затраты на услугу">V, ₽</th>
+                    <th title="Постоянные расходы месяца">F, ₽</th>
+                    <th title="Доля оплаты сразу">A, %</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < draft.Months.Length; i++)
+                {
+                    MonthDraft month = draft.Months[i];
+                    int number = i + 1;
+                    <tr>
+                        <td>@number</td>
+                        <td><input id="q@(number)" type="number" @bind="month.Quantity" @bind:after="Changed" /></td>
+                        <td><input id="p@(number)" type="number" step="0.01" @bind="month.Price" @bind:after="Changed" /></td>
+                        <td><input id="v@(number)" type="number" step="0.01" @bind="month.UnitCost" @bind:after="Changed" /></td>
+                        <td><input id="f@(number)" type="number" step="0.01" @bind="month.FixedCosts" @bind:after="Changed" /></td>
+                        <td><input id="a@(number)" type="number" @bind="month.PaidNowPercent" @bind:after="Changed" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (error is not null)
+        {
+            <p class="error" id="error">@error</p>
+        }
+
+        <div class="buttons">
+            <button id="calculate" class="primary" @onclick="Calculate">Рассчитать</button>
+            <button id="save" @onclick="Save">Сохранить</button>
+            @if (status is not null)
+            {
+                <span class="status" id="status">@status</span>
+            }
+        </div>
+
+        @if (forecast is not null)
+        {
+            <h2>Прогноз на три месяца</h2>
+            <table class="forecast" id="forecast">
+                <thead>
+                    <tr>
+                        <th>Месяц</th>
+                        <th>Выручка</th>
+                        <th>Маржинальный доход</th>
+                        <th>Расходы</th>
+                        <th>Прибыль</th>
+                        <th>Поступления</th>
+                        <th>Деньги на конец</th>
+                        <th>Клиенты должны</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < forecast.Months.Count; i++)
+                    {
+                        MonthReport m = forecast.Months[i];
+                        <tr class="@(m.FundingGap > 0 ? "shortage" : "")">
+                            <td>@(i + 1)</td>
+                            <td>@Format.Money(m.Revenue)</td>
+                            <td>@Format.Money(m.Margin)</td>
+                            <td>@Format.Money(m.Expenses)</td>
+                            <td>@Format.Money(m.Profit)</td>
+                            <td>@Format.Money(m.CashReceipts)</td>
+                            <td>@Format.Money(m.ClosingCash)</td>
+                            <td>@Format.Money(m.ClosingReceivables)</td>
+                            <td class="note">@(m.FundingGap > 0 ? "Не хватает денег" : "")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <dl class="totals" id="totals">
+                <dt>Прибыль за 3 месяца</dt><dd>@Format.Money(forecast.TotalProfit)</dd>
+                <dt>Деньги после месяца 3</dt><dd>@Format.Money(forecast.FinalCash)</dd>
+                <dt>Клиенты ещё должны</dt><dd>@Format.Money(forecast.FinalReceivables)</dd>
+                <dt>Нужно денег на старте</dt><dd>@Format.Money(forecast.FundingNeed)</dd>
+            </dl>
+        }
+    </section>
+</div>
+
+@code {
+    private PlanDraft draft = PlanDraft.CreateNew();
+    private IReadOnlyList<PlanSummary> saved = Array.Empty<PlanSummary>();
+    private PlanForecast? forecast;
+    private string? error;
+    private string? status;
+
+    protected override void OnInitialized() => saved = Service.List();
+
+    // П-Ф6: любое изменение ввода скрывает прежний прогноз до нового расчёта
+    private void Changed()
+    {
+        forecast = null;
+        status = null;
+    }
+
+    private void Calculate()
+    {
+        status = null;
+        try
+        {
+            FinancialPlan plan = Service.Build(draft);
+            forecast = Service.Forecast(plan);
+            error = null;
+        }
+        catch (PlanInputException e)
+        {
+            forecast = null;
+            error = e.Message;
+        }
+    }
+
+    private void Save()
+    {
+        try
+        {
+            FinancialPlan plan = Service.Build(draft);
+            Service.Save(plan);
+            saved = Service.List();
+            error = null;
+            status = $"План «{plan.Name}» сохранён";
+        }
+        catch (PlanInputException e)
+        {
+            status = null;
+            error = e.Message;
+        }
+    }
+
+    private void OpenPlan(Guid id)
+    {
+        try
+        {
+            draft = PlanDraft.From(Service.Open(id));
+            error = null;
+        }
+        catch (KeyNotFoundException e)
+        {
+            error = e.Message;
+        }
+        forecast = null;
+        status = null;
+    }
+
+    private void NewPlan()
+    {
+        draft = PlanDraft.CreateNew();
+        forecast = null;
+        error = null;
+        status = null;
+    }
+}

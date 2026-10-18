@@ -44,6 +44,7 @@ package "Findirector.Domain" {
 
 package "Findirector.Application" {
   class PlanService {
+    +Build(draft) : FinancialPlan
     +Forecast(plan) : PlanForecast
     +Compare(first, second) : PlanComparison
     +Save(plan)
@@ -64,6 +65,25 @@ package "Findirector.Application" {
   class PlanSummary {
     +Id : Guid
     +Name : string
+  }
+  class PlanDraft {
+    +Id : Guid
+    +Name : string
+    +OpeningCash : decimal
+    +Months : MonthDraft[3]
+    +{static} CreateNew(name) : PlanDraft
+    +{static} From(plan) : PlanDraft
+  }
+  class MonthDraft {
+    +Quantity : int
+    +Price : decimal
+    +UnitCost : decimal
+    +FixedCosts : decimal
+    +PaidNowPercent : int
+  }
+  class PlanInputException {
+    +Field : string
+    +Reason : string
   }
 }
 
@@ -88,4 +108,8 @@ PlanService ..> PlanComparison : создаёт
 PlanComparison --> "2" PlanForecast
 IPlanRepository ..> FinancialPlan
 IPlanRepository ..> PlanSummary
+PlanDraft *-- "3" MonthDraft
+PlanService ..> PlanDraft : Build
+PlanService ..> PlanInputException : бросает
+PlanDraft ..> FinancialPlan : From
 @enduml

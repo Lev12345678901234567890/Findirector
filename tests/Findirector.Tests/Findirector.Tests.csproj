@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="bunit" Version="2.11.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -15,5 +16,6 @@
     <ProjectReference Include="../../src/Findirector.Domain/Findirector.Domain.csproj" />
     <ProjectReference Include="../../src/Findirector.Application/Findirector.Application.csproj" />
     <ProjectReference Include="../../src/Findirector.Infrastructure/Findirector.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/Findirector.Web/Findirector.Web.csproj" />
   </ItemGroup>
 </Project>

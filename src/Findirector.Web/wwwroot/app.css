@@ -1,0 +1,77 @@
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1e2933;
+    background: #f5f7fa;
+}
+
+h1 { font-size: 1.6rem; margin: 0 0 1rem; }
+h1:focus { outline: none; }
+h2 { font-size: 1.15rem; margin: 1.5rem 0 0.6rem; }
+
+.layout { display: flex; min-height: 100vh; }
+
+.menu {
+    width: 170px;
+    background: #13294b;
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+}
+.menu .brand { color: white; font-weight: bold; padding: 0 1rem 1rem; }
+.menu a { color: #cfd8e3; text-decoration: none; padding: 0.55rem 1rem; }
+.menu a.active { background: #0f6e7a; color: white; }
+
+.content { flex: 1; padding: 1.5rem 2rem; }
+
+.plan-page { display: flex; gap: 2rem; align-items: flex-start; }
+.saved { width: 230px; background: white; border-radius: 8px; padding: 1rem; }
+.saved h2 { margin-top: 0; }
+.saved ul { list-style: none; padding: 0; margin: 0 0 1rem; }
+.saved li { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; gap: 0.5rem; }
+.editor { flex: 1; }
+
+.fields { display: grid; grid-template-columns: 170px 260px; gap: 0.5rem 1rem; align-items: center; margin-bottom: 1rem; }
+
+input, select { padding: 0.35rem 0.5rem; border: 1px solid #b8c3cf; border-radius: 4px; font: inherit; }
+input[type=number] { width: 110px; text-align: right; }
+input:invalid { outline: 1px solid #e50000; }
+
+table { border-collapse: collapse; background: white; }
+th, td { border: 1px solid #d6dde5; padding: 0.4rem 0.6rem; text-align: right; }
+th { background: #eef3f8; }
+td:first-child, th:first-child { text-align: left; }
+
+.forecast tr.shortage td { background: #fbe9eb; }
+.forecast td.note { color: #b31b2c; font-weight: 600; white-space: nowrap; }
+.compare td { color: inherit; font-weight: normal; }
+.compare td:first-child { font-weight: 600; }
+
+.totals { display: grid; grid-template-columns: 220px auto; gap: 0.3rem 1rem; background: white; padding: 0.8rem 1rem; border-radius: 8px; max-width: 420px; }
+.totals dt { color: #5b6b7b; }
+.totals dd { margin: 0; font-weight: 600; text-align: right; }
+
+.buttons { margin: 1rem 0; display: flex; gap: 0.6rem; align-items: center; }
+button { padding: 0.45rem 1rem; border: 1px solid #13294b; background: white; color: #13294b; border-radius: 4px; cursor: pointer; font: inherit; }
+button.primary { background: #13294b; color: white; }
+button.small { padding: 0.2rem 0.6rem; font-size: 0.9rem; }
+
+.error { color: #b31b2c; font-weight: 600; }
+.status { color: #1e7b48; }
+.hint { color: #5b6b7b; }
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: 0.75rem; top: 0.5rem; }
+
+.blazor-error-boundary { background: #b32121; padding: 1rem; color: white; }
+.blazor-error-boundary::after { content: "Произошла ошибка."; }

@@ -1,7 +1,7 @@
 @startuml
 !pragma layout smetana
 
-component "UI\n(Findirector.Web / Console)" as UI
+component "UI\n(Findirector.Web — Blazor,\nFindirector.Console)" as UI
 component "Application\n(Findirector.Application)" as App
 component "Domain\n(Findirector.Domain)" as Domain
 component "Infrastructure\n(Findirector.Infrastructure)" as Infra
@@ -9,6 +9,7 @@ interface "IPlanRepository" as Repo
 database "SQLite" as Db
 
 UI ..> App : вызывает операции
+UI ..> Infra : создаёт хранилище\nв Program.cs
 UI ..> Domain : создаёт план,\nчитает отчёты
 App ..> Domain : считает
 App -- Repo

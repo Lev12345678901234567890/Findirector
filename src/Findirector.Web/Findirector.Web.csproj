@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Findirector.Domain/Findirector.Domain.csproj" />
+    <ProjectReference Include="../Findirector.Application/Findirector.Application.csproj" />
+    <ProjectReference Include="../Findirector.Infrastructure/Findirector.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

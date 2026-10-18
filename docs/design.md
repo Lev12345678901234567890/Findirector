@@ -11,7 +11,7 @@
 | Domain | Findirector.Domain | План, параметры месяца, результаты, проверка ограничений и все финансовые формулы | Ни от чего (только .NET) |
 | Application | Findirector.Application | Операции: прогноз, сравнение, сохранение, список, открытие. Порядок расчёта трёх месяцев. Интерфейс хранилища `IPlanRepository` | Domain |
 | Infrastructure | Findirector.Infrastructure | Хранение планов в SQLite, реализует `IPlanRepository` (ЛР4) | Application, Domain |
-| UI | Findirector.Web (Blazor, ЛР5); сейчас Findirector.Console | Ввод данных, кнопки, вывод таблиц и ошибок. Вызывает только операции Application | Application, Domain |
+| UI | Findirector.Web (Blazor, ЛР5) и учебная Findirector.Console | Ввод данных, кнопки, вывод таблиц и ошибок. Вызывает только операции Application | Application, Domain; Infrastructure — только в точке запуска (`Program.cs`) |
 
 Domain ничего не знает об остальных частях. Application знает только Domain и сам объявляет,
 какое хранилище ему нужно. Infrastructure подстраивается под интерфейс из Application, а не наоборот.
@@ -29,6 +29,12 @@ Domain ничего не знает об остальных частях. Applic
 **ЛР4.** Добавлены `IPlanRepository` и `PlanSummary` (Application), операции `PlanService.Save`, `List`, `Open`
 и проект `Findirector.Infrastructure` с `SqlitePlanRepository`. `PlanService` получает хранилище через
 конструктор и знает только интерфейс (DIP). Схема базы — в [data.md](data.md). Формулы Domain не менялись (ЛР4-А1).
+
+**ЛР5.** Добавлен проект `Findirector.Web` (Blazor Web App, интерактивный режим Server) с экранами «План»
+и «Сравнение» — см. [ui.md](ui.md). В Application добавлены `PlanDraft` и `MonthDraft` (поля формы),
+`PlanService.Build` и `PlanInputException` (ошибка с полем и причиной, П-Ф5). `SqlitePlanRepository` и
+`PlanService` создаются в `Program.cs` проекта Web и передаются в компоненты через DI. В Razor-компонентах
+нет формул: они вызывают `PlanService` и выводят готовые `MonthReport` и `PlanForecast` (ЛР5-А1).
 
 ## 2. Классы (ЛР2-Д2)
 
@@ -54,6 +60,8 @@ Domain ничего не знает об остальных частях. Applic
 - `PlanComparison` — результат сравнения: два плана и их прогнозы.
 - `PlanSummary` — строка списка планов: `Id`, `Name`.
 - `IPlanRepository` — интерфейс хранилища: `Save`, `List`, `Get`.
+- `PlanDraft`, `MonthDraft` (ЛР5) — изменяемые поля формы; `PlanDraft.CreateNew()` и `PlanDraft.From(plan)`.
+- `PlanInputException` (ЛР5) — ошибка ввода: `Field` (поле и месяц) и `Reason` (причина).
 
 ## 3. Контракты операций (ЛР2-Д3)
 
@@ -109,6 +117,11 @@ Domain ничего не знает об остальных частях. Applic
 - **Ошибки:** плана нет → `KeyNotFoundException` («План не найден»).
 
 ### 3.6. Ошибки ввода (П-Ф5)
+
+**ЛР5 — `Build(PlanDraft draft) : FinancialPlan`.** Создаёт `MonthPlan` для каждого месяца и `FinancialPlan`.
+Если конструктор Domain бросил `ArgumentException`, операция бросает `PlanInputException` с полем
+(«Месяц 2, оплата сразу (A)») и причиной из Domain. Сами проверки остаются в Domain, Build их не повторяет.
+
 
 Ограничения проверяют конструкторы Domain: `MonthPlan` (Q, P, V, F, A) и `FinancialPlan`
 (название, начальные деньги, три месяца). Нарушение — `ArgumentException` или
